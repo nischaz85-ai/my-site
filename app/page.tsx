@@ -94,6 +94,15 @@ function syncQuizQuestions(savedQuiz: QuizQuestion[]): QuizQuestion[] {
   return [...syncedSaved, ...shuffleArray(newQuestions)];
 }
 
+function getAuthRedirectUrl(path = "") {
+  const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
+  const siteUrl =
+    configuredSiteUrl ||
+    (typeof window !== "undefined" ? window.location.origin : "");
+
+  return `${siteUrl}${path}`;
+}
+
 // ── Background orbs ────────────────────────────────────────────────────────
 function BgOrbs() {
   return (
@@ -305,7 +314,7 @@ export default function Home() {
       email: normalizedEmail,
       password,
       options: {
-        emailRedirectTo: window.location.origin,
+        emailRedirectTo: getAuthRedirectUrl(),
       },
     });
     setAuthSubmitting(false);
@@ -328,7 +337,7 @@ export default function Home() {
     if (!normalizedEmail) { setAuthMessage("Enter your email address first."); return; }
     setAuthSubmitting(true);
     const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
-      redirectTo: `${window.location.origin}/reset-password`,
+      redirectTo: getAuthRedirectUrl("/reset-password"),
     });
     setAuthSubmitting(false);
     if (error) { setAuthMessage(error.message); return; }
